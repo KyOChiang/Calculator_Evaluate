@@ -206,3 +206,70 @@ void test_evaluateAllOperatorsOnStack_should_evaluate_5_xor_6_or_7_and_8_plus_9(
 	evaluateAllOperatorsOnStack(&operatorStack, &dataStack);
 }
 
+void test_tryEvaluateOperatorsOnStackThenPush_should_stop_if_pass_in_OP_has_higher_precedene(){
+	Stack dataStack;
+	Stack operatorStack;
+	OperatorToken multiply = {.type = OPERATOR_TOKEN, .name = "*", .precedence = 100};
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	NumberToken no_3 = {.type = NUMBER_TOKEN, .value = 3};
+	NumberToken no_4 = {.type = NUMBER_TOKEN, .value = 4};
+	NumberToken no_9 = {.type = NUMBER_TOKEN, .value = 9};
+	NumberToken no_12 = {.type = NUMBER_TOKEN, .value = 12};
+	NumberToken no_21 = {.type = NUMBER_TOKEN, .value = 21};
+	
+	//3*4+9 = (3*4)+9 = 12+9 = 21
+	pop_ExpectAndReturn(&operatorStack,&plus);
+	push_Expect(&operatorStack,&plus);
+	push_Expect(&operatorStack,&multiply);
+	tryEvaluateOperatorsOnStackThenPush(&operatorStack,&dataStack,&multiply);
+}
+
+void test_tryEvaluateOperatorsOnStackThenPush_should_do_multiply_first_if_pass_in_OP_has_lower_precedene(){
+	Stack dataStack;
+	Stack operatorStack;
+	OperatorToken multiply = {.type = OPERATOR_TOKEN, .name = "*", .precedence = 100};
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	NumberToken no_3 = {.type = NUMBER_TOKEN, .value = 3};
+	NumberToken no_4 = {.type = NUMBER_TOKEN, .value = 4};
+	NumberToken no_9 = {.type = NUMBER_TOKEN, .value = 9};
+	NumberToken no_12 = {.type = NUMBER_TOKEN, .value = 12};
+	NumberToken no_21 = {.type = NUMBER_TOKEN, .value = 21};
+	
+	//3*4+9 = (3*4)+9 = 12+9 = 21
+	pop_ExpectAndReturn(&operatorStack,&multiply);
+	pop_ExpectAndReturn(&dataStack, &no_3);
+	pop_ExpectAndReturn(&dataStack, &no_4);
+	createNumberToken_ExpectAndReturn(12, &no_12);
+	push_Expect(&dataStack, &no_12);
+	pop_ExpectAndReturn(&operatorStack,NULL);
+	push_Expect(&operatorStack,&plus);
+	
+	tryEvaluateOperatorsOnStackThenPush(&operatorStack,&dataStack,&plus);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

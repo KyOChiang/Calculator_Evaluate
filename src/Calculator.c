@@ -11,6 +11,22 @@ int evaluate(char *expression){
 	return 0;
 }
 
+void tryEvaluateOperatorsOnStackThenPush(Stack *operatorStack, Stack *dataStack, OperatorToken *Operator){
+	OperatorToken *OP = pop(operatorStack);
+	while(OP!=NULL){
+		if(OP->precedence >= Operator->precedence){
+			evaluateOperator(dataStack, OP);
+			OP = pop(operatorStack);
+		}
+		else{
+			push(operatorStack,OP);
+			break;
+		}
+	}
+	push(operatorStack,Operator);
+}
+
+
 void evaluateAllOperatorsOnStack(Stack *operatorStack, Stack *dataStack){
 	OperatorToken *OP = pop(operatorStack);
 	
