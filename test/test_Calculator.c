@@ -205,3 +205,4 @@ void test_evaluateAllOperatorsOnStack_should_evaluate_5_xor_6_or_7_and_8_plus_9(
 	
 	evaluateAllOperatorsOnStack(&operatorStack, &dataStack);
 }
+
