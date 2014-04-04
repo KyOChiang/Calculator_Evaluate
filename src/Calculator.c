@@ -7,8 +7,51 @@
 #include "Error.h"
 #include "Calculator.h"
 
-int evaluate(char *expression){
-	return 0;
+int evaluate(char *expression, Stack *operatorStack, Stack *dataStack){
+	Tokenizer *tokenizer;
+	Token *token;
+	NumberToken *number;
+	OperatorToken *operator;
+	NumberToken *result;
+	
+	tokenizer = tokenizerNew(expression);
+	for(;;){
+		number = (NumberToken *)nextToken(tokenizer);
+		if(number == NULL){
+			evaluateAllOperatorsOnStack(operatorStack,dataStack);
+			break;
+		}
+		else if(number->type != NUMBER_TOKEN){
+			Throw(ERR_NOT_DATA);
+		}
+		else{
+			push(dataStack,number);
+		}
+		operator = (OperatorToken *)nextToken(tokenizer);
+		if(operator==NULL){
+			evaluateAllOperatorsOnStack(operatorStack,dataStack);
+			break;
+		}
+		else if(operator->type != OPERATOR_TOKEN){
+			Throw(ERR_NOT_OPERATOR);
+		}
+		else{
+			tryEvaluateOperatorsOnStackThenPush(operatorStack,dataStack,operator);
+		}
+		// number = (NumberToken *)nextToken(tokenizer);
+		// if(number == NULL){
+			// Throw(ERR_INVALID_EXPRESSION);
+		// }
+	}
+	result = pop(dataStack);
+	
+	// operator = (OperatorToken *)nextToken(tokenizer);
+	// number = (NumberToken *)nextToken(tokenizer);
+	// operator = (OperatorToken *)nextToken(tokenizer);
+	// number = (NumberToken *)nextToken(tokenizer);
+	// token 
+	
+	return result->value;
 }
 
 void tryEvaluateOperatorsOnStackThenPush(Stack *operatorStack, Stack *dataStack, OperatorToken *Operator){

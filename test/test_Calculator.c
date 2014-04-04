@@ -247,7 +247,170 @@ void test_tryEvaluateOperatorsOnStackThenPush_should_do_multiply_first_if_pass_i
 	tryEvaluateOperatorsOnStackThenPush(&operatorStack,&dataStack,&plus);
 }
 
+void xtest_evaluate_should_evaluate_an_expression_1_plus_2_and_compute_result(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	NumberToken *number;
+	CEXCEPTION_T ERR;
+	
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	NumberToken no_1 = {.type = NUMBER_TOKEN, .value = 1};
+	NumberToken no_2 = {.type = NUMBER_TOKEN, .value = 2};
+	NumberToken no_3 = {.type = NUMBER_TOKEN, .value = 3};
+	
+	tokenizerNew_ExpectAndReturn("1 + 2",&tokenizer);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_1);
+	push_Expect(&dataStack,(Token *)&no_1);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&plus);
+	pop_ExpectAndReturn(&operatorStack,NULL);
+	push_Expect(&operatorStack,(Token *)&plus);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_2);
+	push_Expect(&operatorStack,(Token *)&no_2);
+	
+	nextToken_ExpectAndReturn(&tokenizer,NULL);
+	pop_ExpectAndReturn(&operatorStack,NULL);
+	
+	pop_ExpectAndReturn(&dataStack,&no_3);
+	
+	evaluate("1 + 2", &operatorStack, &dataStack);
+}
 
+void test_evaluate_should_throw_ERR_NOT_DATA_with_plus_only(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	NumberToken *number;
+	CEXCEPTION_T ERR;
+	
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	tokenizerNew_ExpectAndReturn("+",&tokenizer);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&plus);
+	
+	Try{
+		evaluate("+", &operatorStack, &dataStack);
+	}Catch(ERR){
+		TEST_ASSERT_EQUAL(ERR_NOT_DATA,ERR);
+	}
+}
+
+void test_evaluate_should_throw_ERR_NOT_OPERATOR_for_38_space_39(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	NumberToken *number;
+	CEXCEPTION_T ERR;
+	
+	NumberToken no_39 = {.type = NUMBER_TOKEN, .value = 39};
+	NumberToken no_38 = {.type = NUMBER_TOKEN, .value = 38};
+	
+	tokenizerNew_ExpectAndReturn("38 39",&tokenizer);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_38);
+	push_Expect(&dataStack,&no_38);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_39);
+	
+	Try{
+		evaluate("38 39", &operatorStack, &dataStack);
+	}Catch(ERR){
+		TEST_ASSERT_EQUAL(ERR_NOT_OPERATOR,ERR);
+	}
+}
+
+void test_evaluate_should_throw_ERR_NOT_DATA_for_40_plus_mul(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	NumberToken *number;
+	CEXCEPTION_T ERR;
+	
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	OperatorToken mul = {.type = OPERATOR_TOKEN, .name = "*", .precedence = 100};
+	NumberToken no_40 = {.type = NUMBER_TOKEN, .value = 40};
+	NumberToken no_38 = {.type = NUMBER_TOKEN, .value = 38};
+	
+	
+	tokenizerNew_ExpectAndReturn("40+*",&tokenizer);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_40);
+	push_Expect(&dataStack,&no_40);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&plus);
+	pop_ExpectAndReturn(&operatorStack,NULL);
+	push_Expect(&operatorStack,&plus);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&mul);
+	
+	Try{
+		evaluate("40+*", &operatorStack, &dataStack);
+	}Catch(ERR){
+		TEST_ASSERT_EQUAL(ERR_NOT_DATA,ERR);
+	}
+}
+
+void test_evaluate_should_throw_ERR_INVALID_EXPRESSION_with_43_HASH(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	NumberToken *number;
+	CEXCEPTION_T ERR;
+	NumberToken no_43 = {.type = NUMBER_TOKEN, .value = 43};
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	tokenizerNew_ExpectAndReturn("43#",&tokenizer);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_43);
+	push_Expect(&dataStack,&no_43);
+	
+	nextToken_ExpectAndThrow(&tokenizer,ERR_INVALID_EXPRESSION);
+	
+	Try{
+		evaluate("43#", &operatorStack, &dataStack);
+	}Catch(ERR){
+		TEST_ASSERT_EQUAL(ERR_INVALID_EXPRESSION,ERR);
+	}
+}
+
+void test_evaluate_should_throw_ERR_INVALID_EXPRESSION_with_42_XOR_2_minus(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	NumberToken *number;
+	CEXCEPTION_T ERR;
+	NumberToken no_42 = {.type = NUMBER_TOKEN, .value = 42};
+	NumberToken no_2 = {.type = NUMBER_TOKEN, .value = 2};
+	OperatorToken xor = {.type = OPERATOR_TOKEN, .name = "^", .precedence = 50};
+	OperatorToken minus = {.type = OPERATOR_TOKEN, .name = "-", .precedence = 70};
+	
+	tokenizerNew_ExpectAndReturn("42^2-",&tokenizer);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_42);
+	push_Expect(&dataStack,&no_42);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&xor);
+	pop_ExpectAndReturn(&operatorStack,NULL);
+	push_Expect(&operatorStack,&xor);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_2);
+	push_Expect(&dataStack,&no_2);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&minus);
+	pop_ExpectAndReturn(&operatorStack,&xor);
+	push_Expect(&operatorStack,&xor);
+	push_Expect(&operatorStack,&minus);
+	
+	nextToken_ExpectAndThrow(&tokenizer,ERR_INVALID_EXPRESSION);
+	
+	Try{
+		evaluate("42^2-", &operatorStack, &dataStack);
+	}Catch(ERR){
+		TEST_ASSERT_EQUAL(ERR_INVALID_EXPRESSION,ERR);
+	}
+}
 
 
 
