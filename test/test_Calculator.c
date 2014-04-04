@@ -136,3 +136,72 @@ void test_evaluateOperator_should_or_2_values_when_or_given(){
 	
 	evaluateOperator(&dataStack, &or);
 }
+
+void test_evaluateAllOperatorsOnStack_should_evaluate_2_plus_3_mul_4(){
+	Stack dataStack;
+	Stack operatorStack;
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	OperatorToken multiply = {.type = OPERATOR_TOKEN, .name = "*", .precedence = 100};
+	NumberToken no_2 = {.type = NUMBER_TOKEN, .value = 2};
+	NumberToken no_4 = {.type = NUMBER_TOKEN, .value = 4};
+	NumberToken no_3 = {.type = NUMBER_TOKEN, .value = 3};
+	NumberToken no_12 = {.type = NUMBER_TOKEN, .value = 12};
+	NumberToken no_14 = {.type = NUMBER_TOKEN, .value = 14};
+	
+	//2+3*4
+	pop_ExpectAndReturn(&operatorStack, &multiply);
+	pop_ExpectAndReturn(&dataStack, &no_4);
+	pop_ExpectAndReturn(&dataStack, &no_3);
+	createNumberToken_ExpectAndReturn(12, &no_12);
+	push_Expect(&dataStack, &no_12);
+	pop_ExpectAndReturn(&operatorStack, &plus);
+	pop_ExpectAndReturn(&dataStack, &no_12);
+	pop_ExpectAndReturn(&dataStack, &no_2);
+	createNumberToken_ExpectAndReturn(14, &no_14);
+	push_Expect(&dataStack, &no_14);
+	pop_ExpectAndReturn(&operatorStack,NULL);
+	
+	evaluateAllOperatorsOnStack(&operatorStack, &dataStack);
+}
+
+void test_evaluateAllOperatorsOnStack_should_evaluate_5_xor_6_or_7_and_8_plus_9(){
+	Stack dataStack;
+	Stack operatorStack;
+	OperatorToken xor = {.type = OPERATOR_TOKEN, .name = "^", .precedence = 50};
+	OperatorToken and = {.type = OPERATOR_TOKEN, .name = "&", .precedence = 20};
+	OperatorToken or = {.type = OPERATOR_TOKEN, .name = "|", .precedence = 10};
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	NumberToken no_8 = {.type = NUMBER_TOKEN, .value = 8};
+	NumberToken no_9 = {.type = NUMBER_TOKEN, .value = 9};
+	NumberToken no_7 = {.type = NUMBER_TOKEN, .value = 7};
+	NumberToken no_17 = {.type = NUMBER_TOKEN, .value = 17};
+	NumberToken no_1 = {.type = NUMBER_TOKEN, .value = 1};
+	NumberToken no_3 = {.type = NUMBER_TOKEN, .value = 3};
+	NumberToken no_6 = {.type = NUMBER_TOKEN, .value = 6};
+	NumberToken no_5 = {.type = NUMBER_TOKEN, .value = 5};
+	
+	//5^6|7&8+9
+	pop_ExpectAndReturn(&operatorStack, &xor);
+	pop_ExpectAndReturn(&dataStack, &no_5);
+	pop_ExpectAndReturn(&dataStack, &no_6);
+	createNumberToken_ExpectAndReturn(3, &no_3);
+	push_Expect(&dataStack, &no_3);
+	pop_ExpectAndReturn(&operatorStack, &plus);
+	pop_ExpectAndReturn(&dataStack, &no_8);
+	pop_ExpectAndReturn(&dataStack, &no_9);
+	createNumberToken_ExpectAndReturn(17, &no_17);
+	push_Expect(&dataStack, &no_17);
+	pop_ExpectAndReturn(&operatorStack, &and);
+	pop_ExpectAndReturn(&dataStack, &no_7);
+	pop_ExpectAndReturn(&dataStack, &no_17);
+	createNumberToken_ExpectAndReturn(1, &no_1);
+	push_Expect(&dataStack, &no_1);
+	pop_ExpectAndReturn(&operatorStack, &or);
+	pop_ExpectAndReturn(&dataStack, &no_3);
+	pop_ExpectAndReturn(&dataStack, &no_1);
+	createNumberToken_ExpectAndReturn(3, &no_3);
+	push_Expect(&dataStack, &no_3);
+	pop_ExpectAndReturn(&operatorStack,NULL);
+	
+	evaluateAllOperatorsOnStack(&operatorStack, &dataStack);
+}

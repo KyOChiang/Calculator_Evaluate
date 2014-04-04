@@ -11,6 +11,16 @@ int evaluate(char *expression){
 	return 0;
 }
 
+void evaluateAllOperatorsOnStack(Stack *operatorStack, Stack *dataStack){
+	OperatorToken *OP = pop(operatorStack);
+	
+	while(OP != NULL){
+		evaluateOperator(dataStack,OP);
+		OP = pop(operatorStack);
+	}
+	
+}
+
 void evaluateOperator(Stack *dataStack, OperatorToken *Operator){
 	NumberToken *result;
 	NumberToken *left = pop(dataStack);
