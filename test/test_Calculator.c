@@ -472,7 +472,7 @@ void test_evaluate_should_evaluate_an_expression_111_divide_12_plus_13_and_14_an
 	TEST_ASSERT_EQUAL(6, result);
 }
 
-void test_evaluate_should_evaluate_an_expression_211_and_22_xor_23_plus_24_mul_25_and_compute_result(){
+void test_evaluate_should_evaluate_an_expression_211_and_22_xor_23_plus_24_and_compute_result(){
 	Stack dataStack;
 	Stack operatorStack;
 	Tokenizer tokenizer;
