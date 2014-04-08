@@ -251,7 +251,6 @@ void test_evaluate_should_evaluate_an_expression_1_plus_2_and_compute_result(){
 	Stack dataStack;
 	Stack operatorStack;
 	Tokenizer tokenizer;
-	NumberToken *number;
 	CEXCEPTION_T ERR;
 	int result;
 	
@@ -290,7 +289,6 @@ void test_evaluate_should_evaluate_an_expression_4_mul_3_and_compute_result(){
 	Stack dataStack;
 	Stack operatorStack;
 	Tokenizer tokenizer;
-	NumberToken *number;
 	CEXCEPTION_T ERR;
 	int result;
 	
@@ -397,6 +395,255 @@ void test_evaluate_should_evaluate_an_expression_3_plus_4_plus_5_minus_6_and_com
 	}
 
 	TEST_ASSERT_EQUAL(6, result);
+}
+
+void test_evaluate_should_evaluate_an_expression_111_divide_12_plus_13_and_14_and_compute_result(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	NumberToken *number;
+	CEXCEPTION_T ERR;
+	int result;
+
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	OperatorToken divide = {.type = OPERATOR_TOKEN, .name = "/", .precedence = 100};
+	OperatorToken and = {.type = OPERATOR_TOKEN, .name = "&", .precedence = 20};
+	NumberToken no_111 = {.type = NUMBER_TOKEN, .value = 111};
+	NumberToken no_12 = {.type = NUMBER_TOKEN, .value = 12};
+	NumberToken no_13 = {.type = NUMBER_TOKEN, .value = 13};
+	NumberToken no_14 = {.type = NUMBER_TOKEN, .value = 14};
+	NumberToken no_9 = {.type = NUMBER_TOKEN, .value = 9};
+	NumberToken no_22 = {.type = NUMBER_TOKEN, .value = 22};
+	NumberToken no_6 = {.type = NUMBER_TOKEN, .value = 6};
+
+	// ((111 / 12) + 13) & 14
+	tokenizerNew_ExpectAndReturn("111 / 12 + 13 & 14", &tokenizer);
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_111);
+	push_Expect(&dataStack, &no_111);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&divide);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+	push_Expect(&operatorStack, &divide);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_12);
+	push_Expect(&dataStack, &no_12);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&plus);
+	pop_ExpectAndReturn(&operatorStack, &divide);
+	pop_ExpectAndReturn(&dataStack, &no_12);
+	pop_ExpectAndReturn(&dataStack, &no_111);
+	createNumberToken_ExpectAndReturn(9, &no_9);
+	push_Expect(&dataStack, &no_9);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+	push_Expect(&operatorStack, &plus);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_13);
+	push_Expect(&dataStack, &no_13);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&and);
+	pop_ExpectAndReturn(&operatorStack, &plus);
+	pop_ExpectAndReturn(&dataStack, &no_13);
+	pop_ExpectAndReturn(&dataStack, &no_9);
+	createNumberToken_ExpectAndReturn(22, &no_22);
+	push_Expect(&dataStack, &no_22);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+	push_Expect(&operatorStack, &and);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_14);
+	push_Expect(&dataStack, &no_14);
+
+	nextToken_ExpectAndReturn(&tokenizer, NULL);
+
+	pop_ExpectAndReturn(&operatorStack, &and);
+	pop_ExpectAndReturn(&dataStack, &no_14);
+	pop_ExpectAndReturn(&dataStack, &no_22);
+	createNumberToken_ExpectAndReturn(6, &no_6);
+	push_Expect(&dataStack, &no_6);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+
+	pop_ExpectAndReturn(&dataStack, &no_6);
+
+	Try{
+		result = evaluate("111 / 12 + 13 & 14", &operatorStack, &dataStack);
+	}Catch(ERR){
+		TEST_FAIL_MESSAGE("Error Exception!");
+	}
+
+	TEST_ASSERT_EQUAL(6, result);
+}
+
+void test_evaluate_should_evaluate_an_expression_211_and_22_xor_23_plus_24_mul_25_and_compute_result(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	CEXCEPTION_T ERR;
+	int result;
+
+	OperatorToken and = {.type = OPERATOR_TOKEN, .name = "&", .precedence = 20};
+	OperatorToken xor = {.type = OPERATOR_TOKEN, .name = "^", .precedence = 50};
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	NumberToken no_211 = {.type = NUMBER_TOKEN, .value = 211};
+	NumberToken no_22 = {.type = NUMBER_TOKEN, .value = 22};
+	NumberToken no_23 = {.type = NUMBER_TOKEN, .value = 23};
+	NumberToken no_24 = {.type = NUMBER_TOKEN, .value = 24};
+	NumberToken no_47 = {.type = NUMBER_TOKEN, .value = 47};
+	NumberToken no_57 = {.type = NUMBER_TOKEN, .value = 57};
+	NumberToken no_17 = {.type = NUMBER_TOKEN, .value = 17};
+
+	// 211 & (22 ^ (23 + 24))
+	tokenizerNew_ExpectAndReturn("211 & 22 ^ 23 + 24", &tokenizer);
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_211);
+	push_Expect(&dataStack, &no_211);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&and);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+	push_Expect(&operatorStack, &and);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_22);
+	push_Expect(&dataStack, &no_22);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&xor);
+	pop_ExpectAndReturn(&operatorStack, &and);
+	push_Expect(&operatorStack, &and);
+	push_Expect(&operatorStack, &xor);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_23);
+	push_Expect(&dataStack, &no_23);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&plus);
+	pop_ExpectAndReturn(&operatorStack, &xor);
+	push_Expect(&operatorStack, &xor);
+	push_Expect(&operatorStack, &plus);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_24);
+	push_Expect(&dataStack, &no_24);
+
+	nextToken_ExpectAndReturn(&tokenizer, NULL);
+	pop_ExpectAndReturn(&operatorStack, &plus);
+
+	pop_ExpectAndReturn(&dataStack, &no_24);
+	pop_ExpectAndReturn(&dataStack, &no_23);
+	createNumberToken_ExpectAndReturn(47, &no_47);
+	push_Expect(&dataStack, &no_47);
+
+	pop_ExpectAndReturn(&operatorStack, &xor);
+	pop_ExpectAndReturn(&dataStack, &no_47);
+	pop_ExpectAndReturn(&dataStack, &no_22);
+	createNumberToken_ExpectAndReturn(57, &no_57);
+	push_Expect(&dataStack, &no_57);
+
+	pop_ExpectAndReturn(&operatorStack, &and);
+	pop_ExpectAndReturn(&dataStack, &no_57);
+	pop_ExpectAndReturn(&dataStack, &no_211);
+	createNumberToken_ExpectAndReturn(17, &no_17);
+	push_Expect(&dataStack, &no_17);
+
+	pop_ExpectAndReturn(&operatorStack, NULL);
+
+	pop_ExpectAndReturn(&dataStack, &no_17);
+
+	Try{
+		result = evaluate("211 & 22 ^ 23 + 24", &operatorStack, &dataStack);
+	}Catch(ERR){
+		TEST_FAIL_MESSAGE("Error Exception!");
+	}
+
+	TEST_ASSERT_EQUAL(17, result);
+}
+
+void test_evaluate_should_evaluate_an_expression_266_or_27_xor_28_plus_29_and_30_and_compute_result(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	CEXCEPTION_T ERR;
+	int result;
+
+	OperatorToken or = {.type = OPERATOR_TOKEN, .name = "|", .precedence = 10};
+	OperatorToken xor = {.type = OPERATOR_TOKEN, .name = "^", .precedence = 50};
+	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	OperatorToken and = {.type = OPERATOR_TOKEN, .name = "&", .precedence = 20};
+	NumberToken no_266 = {.type = NUMBER_TOKEN, .value = 266};
+	NumberToken no_27 = {.type = NUMBER_TOKEN, .value = 27};
+	NumberToken no_28 = {.type = NUMBER_TOKEN, .value = 28};
+	NumberToken no_29 = {.type = NUMBER_TOKEN, .value = 29};
+	NumberToken no_30 = {.type = NUMBER_TOKEN, .value = 30};
+	NumberToken no_57 = {.type = NUMBER_TOKEN, .value = 57};
+	NumberToken no_34 = {.type = NUMBER_TOKEN, .value = 34};
+	NumberToken no_2 = {.type = NUMBER_TOKEN, .value = 2};
+	
+	// 266 | ((27 ^ (28 + 29)) & 30)
+	tokenizerNew_ExpectAndReturn("266 | 27 ^ 28 + 29 & 30", &tokenizer);
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_266);
+	push_Expect(&dataStack, &no_266);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&or);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+	push_Expect(&operatorStack, &or);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_27);
+	push_Expect(&dataStack, &no_27);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&xor);
+	pop_ExpectAndReturn(&operatorStack, &or);
+	push_Expect(&operatorStack, &or);
+	push_Expect(&operatorStack, &xor);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_28);
+	push_Expect(&dataStack, &no_28);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&plus);
+	pop_ExpectAndReturn(&operatorStack, &xor);
+	push_Expect(&operatorStack, &xor);
+	push_Expect(&operatorStack, &plus);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_29);
+	push_Expect(&dataStack, &no_29);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&and);
+	pop_ExpectAndReturn(&operatorStack, &plus);
+	pop_ExpectAndReturn(&dataStack, &no_29);
+	pop_ExpectAndReturn(&dataStack, &no_28);
+	createNumberToken_ExpectAndReturn(57, &no_57);
+	push_Expect(&dataStack, &no_57);
+
+	pop_ExpectAndReturn(&operatorStack, &xor);
+	pop_ExpectAndReturn(&dataStack, &no_57);
+	pop_ExpectAndReturn(&dataStack, &no_27);
+	createNumberToken_ExpectAndReturn(34, &no_34);
+	push_Expect(&dataStack, &no_34);
+
+	pop_ExpectAndReturn(&operatorStack, &or);
+	push_Expect(&operatorStack, &or);
+	push_Expect(&operatorStack, &and);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_30);
+	push_Expect(&dataStack, &no_30);
+
+	nextToken_ExpectAndReturn(&tokenizer, NULL);
+
+	pop_ExpectAndReturn(&operatorStack, &and);
+	pop_ExpectAndReturn(&dataStack, &no_30);
+	pop_ExpectAndReturn(&dataStack, &no_34);
+	createNumberToken_ExpectAndReturn(2, &no_2);
+	push_Expect(&dataStack, &no_2);
+
+	pop_ExpectAndReturn(&operatorStack, &or);
+	pop_ExpectAndReturn(&dataStack, &no_2);
+	pop_ExpectAndReturn(&dataStack, &no_266);
+	createNumberToken_ExpectAndReturn(266, &no_266);
+	push_Expect(&dataStack, &no_266);
+
+	pop_ExpectAndReturn(&operatorStack, NULL);
+
+	pop_ExpectAndReturn(&dataStack, &no_266);
+
+	Try{
+		result = evaluate("266 | 27 ^ 28 + 29 & 30", &operatorStack, &dataStack);
+	}Catch(ERR){
+		TEST_FAIL_MESSAGE("Error Exception!");
+	}
+
+	TEST_ASSERT_EQUAL(266, result);
 }
 
 void test_evaluate_should_throw_ERR_NOT_DATA_with_plus_only(){
