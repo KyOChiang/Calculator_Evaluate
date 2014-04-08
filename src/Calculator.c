@@ -90,7 +90,7 @@ void evaluateOperator(Stack *dataStack, OperatorToken *Operator){
 		push(dataStack, result);
 	}
 	else if(strcmp(Operator->name,"-")==0){
-		result = createNumberToken(left->value-right->value);
+		result = createNumberToken(right->value-left->value);
 		push(dataStack, result);
 	}
 	else if(strcmp(Operator->name,"*")==0){
@@ -98,7 +98,7 @@ void evaluateOperator(Stack *dataStack, OperatorToken *Operator){
 		push(dataStack, result);
 	}
 	else if(strcmp(Operator->name,"/")==0){
-		result = createNumberToken(left->value/right->value);
+		result = createNumberToken(right->value/left->value);
 		push(dataStack, result);
 	}
 	else if(strcmp(Operator->name,"%")==0){

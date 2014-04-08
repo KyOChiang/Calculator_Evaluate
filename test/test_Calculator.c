@@ -33,8 +33,8 @@ void test_evaluateOperator_should_subtract_2_values_when_minus_given(){
 	NumberToken no_1 = {.type = NUMBER_TOKEN, .value = 1};
 	NumberToken no_3 = {.type = NUMBER_TOKEN, .value = 3};
 	
-	pop_ExpectAndReturn(&dataStack, &no_3);
 	pop_ExpectAndReturn(&dataStack, &no_2);
+	pop_ExpectAndReturn(&dataStack, &no_3);
 	createNumberToken_ExpectAndReturn(1, &no_1);
 	push_Expect(&dataStack, &no_1);
 	
@@ -65,8 +65,8 @@ void test_evaluateOperator_should_divide_2_values_when_divide_given(){
 	NumberToken no_1 = {.type = NUMBER_TOKEN, .value = 1};
 	NumberToken no_3 = {.type = NUMBER_TOKEN, .value = 3};
 	
-	pop_ExpectAndReturn(&dataStack, &no_3);
 	pop_ExpectAndReturn(&dataStack, &no_2);
+	pop_ExpectAndReturn(&dataStack, &no_3);
 	createNumberToken_ExpectAndReturn(1, &no_1);
 	push_Expect(&dataStack, &no_1);
 	
@@ -247,12 +247,13 @@ void test_tryEvaluateOperatorsOnStackThenPush_should_do_multiply_first_if_pass_i
 	tryEvaluateOperatorsOnStackThenPush(&operatorStack,&dataStack,&plus);
 }
 
-void xtest_evaluate_should_evaluate_an_expression_1_plus_2_and_compute_result(){
+void test_evaluate_should_evaluate_an_expression_1_plus_2_and_compute_result(){
 	Stack dataStack;
 	Stack operatorStack;
 	Tokenizer tokenizer;
 	NumberToken *number;
 	CEXCEPTION_T ERR;
+	int result;
 	
 	OperatorToken plus = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
 	NumberToken no_1 = {.type = NUMBER_TOKEN, .value = 1};
@@ -269,14 +270,133 @@ void xtest_evaluate_should_evaluate_an_expression_1_plus_2_and_compute_result(){
 	push_Expect(&operatorStack,(Token *)&plus);
 	
 	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_2);
-	push_Expect(&operatorStack,(Token *)&no_2);
+	push_Expect(&dataStack,(Token *)&no_2);
 	
 	nextToken_ExpectAndReturn(&tokenizer,NULL);
-	pop_ExpectAndReturn(&operatorStack,NULL);
+	pop_ExpectAndReturn(&operatorStack,&plus);
 	
+	pop_ExpectAndReturn(&dataStack,&no_1);
+	pop_ExpectAndReturn(&dataStack,&no_2);
+	createNumberToken_ExpectAndReturn(3, &no_3);
+	push_Expect(&dataStack, &no_3);
+	pop_ExpectAndReturn(&operatorStack,NULL);
 	pop_ExpectAndReturn(&dataStack,&no_3);
 	
-	evaluate("1 + 2", &operatorStack, &dataStack);
+	result = evaluate("1 + 2", &operatorStack, &dataStack);
+	TEST_ASSERT_EQUAL(3,result);
+}
+
+void test_evaluate_should_evaluate_an_expression_4_mul_3_and_compute_result(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	NumberToken *number;
+	CEXCEPTION_T ERR;
+	int result;
+	
+	OperatorToken mul = {.type = OPERATOR_TOKEN, .name = "*", .precedence = 100};
+	NumberToken no_12 = {.type = NUMBER_TOKEN, .value = 12};
+	NumberToken no_4 = {.type = NUMBER_TOKEN, .value = 4};
+	NumberToken no_3 = {.type = NUMBER_TOKEN, .value = 3};
+	
+	tokenizerNew_ExpectAndReturn("4 * 3",&tokenizer);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_4);
+	push_Expect(&dataStack,(Token *)&no_4);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&mul);
+	pop_ExpectAndReturn(&operatorStack,NULL);
+	push_Expect(&operatorStack,(Token *)&mul);
+	
+	nextToken_ExpectAndReturn(&tokenizer,(Token *)&no_3);
+	push_Expect(&dataStack,(Token *)&no_3);
+	
+	nextToken_ExpectAndReturn(&tokenizer,NULL);
+	pop_ExpectAndReturn(&operatorStack,&mul);
+	
+	pop_ExpectAndReturn(&dataStack,&no_3);
+	pop_ExpectAndReturn(&dataStack,&no_4);
+	createNumberToken_ExpectAndReturn(12, &no_12);
+	push_Expect(&dataStack, &no_12);
+	pop_ExpectAndReturn(&operatorStack,NULL);
+	pop_ExpectAndReturn(&dataStack,&no_12);
+	
+	result = evaluate("4 * 3", &operatorStack, &dataStack);
+	TEST_ASSERT_EQUAL(12,result);
+}
+
+void test_evaluate_should_evaluate_an_expression_3_plus_4_plus_5_minus_6_and_compute_result(){
+	Stack dataStack;
+	Stack operatorStack;
+	Tokenizer tokenizer;
+	CEXCEPTION_T ERR;
+	int result;
+
+	OperatorToken plus1 = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	OperatorToken plus2 = {.type = OPERATOR_TOKEN, .name = "+", .precedence = 70};
+	OperatorToken minus = {.type = OPERATOR_TOKEN, .name = "-", .precedence = 70};
+	NumberToken no_3 = {.type = NUMBER_TOKEN, .value = 3};
+	NumberToken no_4 = {.type = NUMBER_TOKEN, .value = 4};
+	NumberToken no_5 = {.type = NUMBER_TOKEN, .value = 5};
+	NumberToken no_6 = {.type = NUMBER_TOKEN, .value = 6};
+	NumberToken no_7 = {.type = NUMBER_TOKEN, .value = 7};
+	NumberToken no_12 = {.type = NUMBER_TOKEN, .value = 12};
+	NumberToken no_66 = {.type = NUMBER_TOKEN, .value = 6};
+
+	//3 + 4 + 5 - 6 = 6
+	tokenizerNew_ExpectAndReturn("3 + 4 + 5 - 6", &tokenizer);
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_3);
+	push_Expect(&dataStack, &no_3);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&plus1);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+	push_Expect(&operatorStack, &plus1);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_4);
+	push_Expect(&dataStack, &no_4);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&plus2);
+	pop_ExpectAndReturn(&operatorStack, &plus1);
+	pop_ExpectAndReturn(&dataStack, &no_4);
+	pop_ExpectAndReturn(&dataStack, &no_3);
+	createNumberToken_ExpectAndReturn(7, &no_7);
+	push_Expect(&dataStack, &no_7);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+	push_Expect(&operatorStack, &plus2);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_5);
+	push_Expect(&dataStack, &no_5);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&minus);
+	pop_ExpectAndReturn(&operatorStack, &plus2);
+	pop_ExpectAndReturn(&dataStack, &no_5);
+	pop_ExpectAndReturn(&dataStack, &no_7);
+	createNumberToken_ExpectAndReturn(12, &no_12);
+	push_Expect(&dataStack, &no_12);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+	push_Expect(&operatorStack, &minus);
+
+	nextToken_ExpectAndReturn(&tokenizer, (Token *)&no_6);
+	push_Expect(&dataStack, &no_6);
+
+	nextToken_ExpectAndReturn(&tokenizer, NULL);
+
+	pop_ExpectAndReturn(&operatorStack, &minus);
+	pop_ExpectAndReturn(&dataStack, &no_6);
+	pop_ExpectAndReturn(&dataStack, &no_12);
+	createNumberToken_ExpectAndReturn(6, &no_6);
+	push_Expect(&dataStack, &no_6);
+	pop_ExpectAndReturn(&operatorStack, NULL);
+
+	pop_ExpectAndReturn(&dataStack, &no_6);
+
+	Try{
+		result = evaluate("3 + 4 + 5 - 6", &operatorStack, &dataStack);
+	}Catch(ERR){
+		TEST_FAIL_MESSAGE("Error Exception!");
+	}
+
+	TEST_ASSERT_EQUAL(6, result);
 }
 
 void test_evaluate_should_throw_ERR_NOT_DATA_with_plus_only(){
